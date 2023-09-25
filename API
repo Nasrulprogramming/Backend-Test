@@ -1,0 +1,61 @@
+Task 2:
+Your company is working on a project, you as a backend developer are given the task of creating an authentication feature that applies refresh tokens and access tokens. Create an API service to handle user authentication also documentation.
+
+Note: Use Node.js
+
+const express = require("express");
+const jwt = require("jsonwebtoken");
+
+const app = express();
+
+const secretKey = "secret_key";
+
+const verifyAccessToken = (req, res, next) => {
+  const accessToken = req.headers["authorization"];
+
+  if (!accessToken) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    jwt.verify(accessToken, secretKey);
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid access token" });
+  }
+
+  // If the access token is valid, allow the request to proceed.
+  next();
+};
+app.post("/login", async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  const accessToken = jwt.sign({ username }, secretKey, { expiresIn: "15m" });
+  const refreshToken = jwt.sign({ username }, secretKey, { expiresIn: "7d" });
+
+  res.cookie("refresh_token", refreshToken);
+
+  res.json({ accessToken });
+});
+app.post("/refresh", async (req, res) => {
+
+  const refreshToken = req.cookies.refresh_token;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const decodedRefreshToken = jwt.verify(refreshToken, secretKey);
+    const username = decodedRefreshToken.username;
+
+    const accessToken = jwt.sign({ username }, secretKey, { expiresIn: "15m" });
+    res.json({ accessToken });
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid refresh token" });
+  }
+});
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
+
