@@ -1,0 +1,40 @@
+Task 1:
+Write the code to achieve the example.
+
+const solution = (a, m, k) => {
+  
+  const sumHash = {};
+
+  let count = 0;
+  for (let i = 0; i < a.length - m + 1; i++) {
+    let subarraySum = 0;
+    for (let j = 0; j < m; j++) {
+      subarraySum += a[i + j];
+    }
+    if (subarraySum === k) {
+      count++;
+    }
+
+    else if (sumHash[k - subarraySum]) {
+      count += sumHash[k - subarraySum];
+    }
+
+    // Add the sum of the elements in the subarray to the hash table.
+    if (!sumHash[subarraySum]) {
+      sumHash[subarraySum] = 0;
+    }
+    sumHash[subarraySum]++;
+  }
+
+  return count;
+};
+
+// Example usage:
+const a = [2, 4, 7, 5, 3, 5, 8, 5, 1, 7];
+const m = 4;
+const k = 10;
+
+const count = solution(a, m, k);
+
+console.log(count); // 5
+ 
